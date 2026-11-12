@@ -152,7 +152,9 @@ button:focus-visible,input:focus-visible,.datepick:focus-within{outline:2px soli
 .nav button[aria-current="page"]{color:var(--ink);border-top-color:var(--accent)}
 .rest{position:fixed;left:0;right:0;bottom:calc(57px + env(safe-area-inset-bottom,0px));z-index:19;background:var(--surface);border-top:1px solid var(--line);
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.restin{max-width:520px;margin:0 auto;display:grid;grid-template-columns:auto auto minmax(0,1fr);align-items:center;gap:12px;min-height:56px}
+.restin{max-width:520px;margin:0 auto;display:grid;grid-template-columns:auto auto minmax(0,1fr) 44px;align-items:center;gap:12px;min-height:56px}
+.reststop{width:44px;height:44px;margin-right:-10px;font-size:18px;color:var(--muted)}
+.rest.done .reststop{color:var(--accent-ink)}
 .restlab{font-size:13px;color:var(--muted);font-weight:700}
 .resttime{font-family:var(--font-num);font-size:32px;font-weight:700;font-variant-numeric:tabular-nums;min-width:2.4em}
 .restbar{height:6px;border-radius:3px;background:var(--bg);overflow:hidden}
@@ -179,7 +181,7 @@ body.resting{padding-bottom:164px}
   <button data-act="tab" data-t="hist">지난 기록</button>
   <button data-act="tab" data-t="sum">요약</button>
 </div></nav>
-<div class="rest" id="rest" hidden><div class="restin"><span class="restlab" id="restlab">휴식</span><span class="resttime" id="resttime">1:30</span><div class="restbar"><i id="restfill"></i></div></div></div>
+<div class="rest" id="rest" hidden><div class="restin"><span class="restlab" id="restlab">휴식</span><span class="resttime" id="resttime">1:30</span><div class="restbar"><i id="restfill"></i></div><button class="reststop" data-act="reststop" aria-label="휴식 타이머 끄기">✕</button></div></div>
 <div class="toast" id="toast" hidden></div>
 
 <script>
@@ -623,6 +625,7 @@ body.resting{padding-bottom:164px}
     else if(a==='edit'){state.edit=!state.edit;state.rm=null;render()}
     else if(a==='rmex'){if(state.rm===ex)rmEx(ex);else{state.rm=ex;render()}}
     else if(a==='deldoc')delDoc(t.dataset.id);
+    else if(a==='reststop')stopRest();
     else if(a==='goto'){state.date=t.dataset.date;state.routine=t.dataset.r;state.tab='log';state.open=null;render();window.scrollTo(0,0)}
   });
   document.addEventListener('input',function(e){
