@@ -80,6 +80,14 @@ button:focus-visible,input:focus-visible,.datepick:focus-within{outline:2px soli
 .rtrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
 .rtrow input{min-width:0;min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:0 12px;font:inherit;font-weight:700}
 .rtdel{min-height:44px;padding:0 12px;color:var(--muted);font-size:13px;text-decoration:underline}
+body.setup .nav{display:none}
+.surow{display:grid;grid-template-columns:10px minmax(0,1fr);gap:12px;align-items:center;margin-top:8px}
+.surow .dot{margin:0}
+.surow input{min-width:0;min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:0 12px;font:inherit;font-weight:700}
+.sufill{display:flex;align-items:center;gap:10px;min-height:44px;margin-top:10px;font-size:14px;cursor:pointer}
+.sufill input{width:20px;height:20px;accent-color:var(--accent);margin:0}
+.hint{margin:4px 0 0;font-size:12px;color:var(--muted)}
+.sugo{margin-top:16px}
 
 .note{color:var(--muted);margin:16px 0;text-align:center}
 .banner{margin:6px 0 0;padding:10px 12px;border-radius:10px;background:var(--surface);color:var(--muted);font-size:13px;border:1px solid var(--line)}
@@ -199,6 +207,26 @@ body.resting{padding-bottom:164px}
     pullB:['바벨 벤트오버 로우','싱글암 덤벨 로우','브이바 케이블 랫 풀다운','리버스 팩덱 플라이','해머 컬','바벨 슈러그'],
     legs:['스쿼트','레그프레스','루마니안 데드리프트','레그 익스텐션','레그 컬','카프 레이즈']
   };
+  /* 처음 설정: 분할 수별 추천 루틴 이름과 종목 */
+  var EX={
+    full:['스쿼트','플랫 바벨 벤치 프레스','바벨 벤트오버 로우','오버헤드 바벨 프레스','루마니안 데드리프트','와이드 그립 랫 풀다운'],
+    upper:['플랫 바벨 벤치 프레스','바벨 벤트오버 로우','오버헤드 바벨 프레스','와이드 그립 랫 풀다운','덤벨 바이셉스 컬','트라이셉스 케이블 익스텐션'],
+    push:['플랫 바벨 벤치 프레스','인클라인 덤벨 벤치 프레스','오버헤드 바벨 프레스','스탠딩 덤벨 레터럴 레이즈','트라이셉스 케이블 익스텐션'],
+    pull:['와이드 그립 풀업','바벨 벤트오버 로우','와이드 그립 랫 풀다운','시티드 케이블 로우','케이블 페이스 풀','바벨 컬'],
+    chest:['플랫 바벨 벤치 프레스','인클라인 덤벨 벤치 프레스','딥스','케이블 크로스오버'],
+    back:['와이드 그립 풀업','바벨 벤트오버 로우','와이드 그립 랫 풀다운','시티드 케이블 로우'],
+    shoulder:['오버헤드 바벨 프레스','스탠딩 덤벨 레터럴 레이즈','리버스 팩덱 플라이','케이블 페이스 풀'],
+    arm:['바벨 컬','해머 컬','트라이셉스 케이블 익스텐션','오버헤드 덤벨 트라이셉스 익스텐션'],
+    legs:DEFAULTS.legs
+  };
+  var TEMPLATES={
+    1:[['전신',EX.full]],
+    2:[['상체',EX.upper],['하체',EX.legs]],
+    3:[['푸시',EX.push],['풀',EX.pull],['하체',EX.legs]],
+    4:[['가슴',EX.chest],['등',EX.back],['어깨',EX.shoulder],['하체',EX.legs]],
+    5:[['푸시1',DEFAULTS.pushA],['푸시2',DEFAULTS.pushB],['풀1',DEFAULTS.pullA],['풀2',DEFAULTS.pullB],['하체',EX.legs]],
+    6:[['푸시1',EX.push],['풀1',EX.pull],['하체1',EX.legs],['푸시2',DEFAULTS.pushB],['풀2',DEFAULTS.pullB],['하체2',EX.legs]]
+  };
   var DOW=['일','월','화','수','목','금','토'];
 
   var $=function(s){return document.querySelector(s)};
@@ -262,13 +290,17 @@ body.resting{padding-bottom:164px}
       var latest=null;state.docs.forEach(function(d){if(!latest||d.ts>latest.ts)latest=d});
       if(latest)state.routine=latest.routine;
       ensureRoutine();
+      // 기록도 루틴 설정도 없는 첫 실행이면 처음 설정 화면
+      var done=false;try{done=!!localStorage.getItem('ppl-setup')}catch(e){}
+      if(!state.docs.size&&!state.cfgRoutines&&!done)state.setup=setupFor(3);
     }
     state.loaded=true;state.err=null;render();
   }
   function applyCfg(data){
     if(pending.get('cfg'))return;
     var rs=data&&Array.isArray(data.routines)?data.routines.filter(function(r){return r&&typeof r.k==='string'&&r.k&&typeof r.label==='string'}).map(function(r){return {k:r.k,label:r.label,c:(Number(r.c)||0)%COLORS,off:!!r.off}}):[];
-    ROUTINES=rs.some(function(r){return !r.off})?rs:clone(ROUTINES0);
+    state.cfgRoutines=rs.some(function(r){return !r.off});
+    ROUTINES=state.cfgRoutines?rs:clone(ROUTINES0);
     if(data&&data.lists){
       var l={};ROUTINES.forEach(function(r){l[r.k]=Array.isArray(data.lists[r.k])?data.lists[r.k].filter(function(s){return typeof s==='string'&&s}):(DEFAULTS[r.k]||[]).slice()});
       state.lists=l;
@@ -324,6 +356,32 @@ body.resting{padding-bottom:164px}
     fn(base);state.lists=base;
     persist('cfg',function(){return store.setCfg({lists:clone(state.lists),routines:clone(ROUTINES)})});
     if(!noRender)render();
+  }
+
+  /* ---------- 처음 설정 ---------- */
+  function setupFor(n,fill){return {n:n,names:TEMPLATES[n].map(function(t){return t[0]}),fill:fill!==false}}
+  function setupHTML(){
+    var s=state.setup,html='<section class="card"><h2>몇 분할로 운동해?</h2><div class="seg" role="group" aria-label="분할 수" style="grid-template-columns:repeat(6,minmax(0,1fr))">';
+    for(var n=1;n<=6;n++)html+='<button data-act="su-n" data-n="'+n+'" style="--rc:var(--accent)" aria-pressed="'+(s.n===n)+'">'+(n===1?'무분할':n+'분할')+'</button>';
+    html+='</div></section><section class="card"><h2>루틴 이름</h2>';
+    s.names.forEach(function(nm,i){
+      html+='<div class="surow"><i class="dot" style="--rc:var(--c'+i+')"></i><input id="su-'+i+'" data-su="'+i+'" maxlength="6" autocomplete="off" value="'+esc(nm)+'" aria-label="'+(i+1)+'번째 루틴 이름"></div>';
+    });
+    html+='<label class="sufill"><input type="checkbox" id="sufill"'+(s.fill?' checked':'')+'>추천 종목 미리 채워두기</label>'+
+      '<p class="hint">루틴 이름과 종목은 나중에 운동 탭 맨 아래 \'종목 편집\'에서 언제든 바꿀 수 있어.</p></section>'+
+      '<button class="rec sugo" data-act="su-go">이렇게 시작</button>';
+    return html;
+  }
+  function finishSetup(){
+    var s=state.setup,t=TEMPLATES[s.n],base=Date.now().toString(36),lists={};
+    ROUTINES=s.names.map(function(nm,i){
+      var k='r'+i+base;lists[k]=s.fill?t[i][1].slice():[];
+      return {k:k,label:String(nm||'').trim().slice(0,6)||t[i][0],c:i};
+    });
+    state.setup=null;state.cfgRoutines=true;
+    try{localStorage.setItem('ppl-setup','1')}catch(e){}
+    mutateLists(function(l){Object.keys(lists).forEach(function(k){l[k]=lists[k]})},true);
+    pickRoutine(ROUTINES[0].k);window.scrollTo(0,0);
   }
 
   /* ---------- 루틴 편집 ---------- */
@@ -667,8 +725,12 @@ body.resting{padding-bottom:164px}
   function render(){
     var app=$('#app'),a=document.activeElement,fid=a&&a.id&&app.contains(a)?a.id:null,pos=null;
     if(fid&&typeof a.selectionStart==='number')pos=[a.selectionStart,a.selectionEnd];
-    $('#head').innerHTML=headHTML();
-    $('#view').innerHTML=state.tab==='hist'?histHTML():state.tab==='sum'?sumHTML():logHTML();
+    document.body.classList.toggle('setup',!!state.setup);
+    if(state.setup){$('#head').innerHTML='<h1 class="h1">처음 설정</h1>';$('#view').innerHTML=setupHTML()}
+    else{
+      $('#head').innerHTML=headHTML();
+      $('#view').innerHTML=state.tab==='hist'?histHTML():state.tab==='sum'?sumHTML():logHTML();
+    }
     document.querySelectorAll('.nav button').forEach(function(b){
       if(b.dataset.t===state.tab)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');
     });
@@ -682,6 +744,8 @@ body.resting{padding-bottom:164px}
     if(a==='tab'){state.tab=t.dataset.t;render();window.scrollTo(0,0)}
     else if(a==='routine')pickRoutine(t.dataset.r);
     else if(a==='rtadd')addRoutine();
+    else if(a==='su-n'){state.setup=setupFor(+t.dataset.n,state.setup.fill);render()}
+    else if(a==='su-go')finishSetup();
     else if(a==='rtdel')delRoutine();
     else if(a==='toggle'){state.open=state.open===ex?null:ex;render()}
     else if(a==='adj'){
@@ -701,6 +765,7 @@ body.resting{padding-bottom:164px}
   document.addEventListener('input',function(e){
     var t=e.target;
     if(t.dataset&&t.dataset.f&&t.dataset.ex){var dr=state.drafts[t.dataset.ex];if(dr)dr[t.dataset.f]=t.value}
+    else if(state.setup&&t.dataset&&t.dataset.su)state.setup.names[+t.dataset.su]=t.value;
   });
   document.addEventListener('keydown',function(e){
     var t=e.target;
@@ -709,7 +774,8 @@ body.resting{padding-bottom:164px}
   });
   document.addEventListener('change',function(e){
     if(e.target.id==='datein'){state.date=e.target.value||today();state.open=null;render()}
-    else if(e.target.id==='rtname')renameRoutine(e.target.value);  });
+    else if(e.target.id==='rtname')renameRoutine(e.target.value);
+    else if(e.target.id==='sufill'&&state.setup)state.setup.fill=e.target.checked;  });
   document.addEventListener('submit',function(e){
     e.preventDefault();
     if(e.target.id==='addex'){addEx($('#newex').value)}
