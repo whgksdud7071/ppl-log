@@ -93,6 +93,38 @@ body.setup .nav{display:none}
 .banner{margin:6px 0 0;padding:10px 12px;border-radius:10px;background:var(--surface);color:var(--muted);font-size:13px;border:1px solid var(--line)}
 
 .ex{background:var(--surface);border-radius:12px;margin-top:10px;overflow:hidden}
+.exhead,.seg button{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.ex,.seg button{position:relative}
+.dragging{z-index:5;box-shadow:0 14px 34px rgba(0,0,0,.32),0 0 0 2px var(--accent);will-change:transform}
+.ex.dragging{overflow:visible}
+body.drag{-webkit-user-select:none;user-select:none;cursor:grabbing}
+
+/* 편집 모드 손잡이(≡) */
+.grip{grid-area:b;justify-self:end;width:44px;height:44px;margin:-8px -10px -8px 0;display:grid;place-items:center;color:var(--muted);touch-action:none;cursor:grab}
+.grip::before{content:"";width:18px;height:12px;background:linear-gradient(currentColor 0 0) 0 0/100% 2px no-repeat,linear-gradient(currentColor 0 0) 0 5px/100% 2px no-repeat,linear-gradient(currentColor 0 0) 0 10px/100% 2px no-repeat;border-radius:1px}
+.edithint{display:flex;align-items:center;gap:8px;margin:12px 2px 0;font-size:13px;color:var(--muted)}
+.edithint .grip{width:auto;height:auto;margin:0}
+.edithint .grip::before{width:14px;height:10px;background-size:100% 1.5px;background-position:0 0,0 4px,0 8px}
+body.editing .seg [data-act="routine"]{touch-action:none}
+body.editing .seg [data-act="routine"]::after{content:"";position:absolute;left:50%;bottom:6px;width:12px;height:6px;margin-left:-6px;opacity:.45;background:linear-gradient(currentColor 0 0) 0 0/100% 1.5px no-repeat,linear-gradient(currentColor 0 0) 0 4px/100% 1.5px no-repeat}
+
+/* 처음 한 번 뜨는 말풍선 */
+.tip{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:14px;margin:14px 0 4px;padding:14px 8px 14px 16px;border-radius:16px;background:var(--ink);color:var(--bg);box-shadow:0 10px 30px rgba(0,0,0,.18);animation:tipin .42s cubic-bezier(.2,.8,.2,1) .25s both}
+.tip::before{content:"";position:absolute;top:-6px;left:26px;width:13px;height:13px;background:inherit;border-radius:3px 0 0 0;transform:rotate(45deg)}
+.tip.out{animation:tipout .22s ease-in both}
+.tiptx{display:grid;gap:1px;min-width:0}
+.tiptx b{font-size:15px;font-weight:700;letter-spacing:-.01em}
+.tiptx span{font-size:13px;opacity:.72}
+.tip button{min-height:44px;padding:0 12px;font-weight:700;font-size:14px;color:var(--accent)}
+.tipic{position:relative;width:26px;height:28px}
+.tipic i{position:absolute;left:0;right:0;height:11px;border-radius:3px;background:currentColor;opacity:.35}
+.tipic i:first-child{top:0;background:var(--accent);opacity:1;z-index:1;animation:tipa 1.5s cubic-bezier(.4,0,.2,1) .8s infinite alternate}
+.tipic i:last-child{top:16px;animation:tipb 1.5s cubic-bezier(.4,0,.2,1) .8s infinite alternate}
+@keyframes tipin{from{opacity:0;transform:translateY(-6px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes tipout{to{opacity:0;transform:translateY(-4px) scale(.98)}}
+@keyframes tipa{0%,15%{transform:none}30%{transform:scale(1.12)}75%{transform:translateY(16px) scale(1.12)}90%,100%{transform:translateY(16px)}}
+@keyframes tipb{0%,35%{transform:none}75%,100%{transform:translateY(-16px)}}
+@media (prefers-reduced-motion:reduce){.tip,.tipic i{animation:none!important}}
 .exhead{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"n b" "m b";align-items:center;gap:2px 12px;width:100%;text-align:left;padding:12px 14px;min-height:60px}
 .exname{grid-area:n;font-weight:700;font-size:16px}
 .exmeta{grid-area:m;color:var(--muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -597,9 +629,9 @@ body.resting{padding-bottom:164px}
     var id=idFor(state.date,state.routine,name),doc=state.docs.get(id),n=doc?doc.sets.length:0;
     var prev=(byEx.get(name)||[]).filter(function(d){return d.date<state.date})[0];
     var meta=prev?'지난번 '+shortDate(prev.date)+' · '+prev.sets.map(setTxt).join(' '):'아직 기록 없음';
-    var open=state.open===name,html='<section class="ex">';
+    var open=state.open===name,html='<section class="ex" data-name="'+esc(name)+'">';
     html+='<button class="exhead" id="eh-'+hash(name)+'" data-act="toggle" data-ex="'+esc(name)+'" aria-expanded="'+open+'">'+
-      '<span class="exname">'+esc(name)+'</span><span class="exmeta">'+esc(meta)+'</span><span class="badge">'+(n?n+'세트':'')+'</span></button>';
+      '<span class="exname">'+esc(name)+'</span><span class="exmeta">'+esc(meta)+'</span>'+(state.edit?'<span class="grip" aria-label="끌어서 순서 바꾸기"></span>':'<span class="badge">'+(n?n+'세트':'')+'</span>')+'</button>';
     if(open){
       var dr=state.drafts[name];
       if(!dr){
@@ -635,7 +667,9 @@ body.resting{padding-bottom:164px}
     var names=listFor(state.routine),byEx=exIndex(),html='';
     if(state.err)html+='<p class="banner">기록을 불러오지 못했어. 잠시 뒤에 다시 열어줘.</p>';
     if(!state.loaded)html+='<p class="note">불러오는 중…</p>';
-    html+=names.length?names.map(function(n){return exHTML(n,byEx)}).join(''):'<p class="note">이 루틴에 종목이 없어. 아래 종목 편집에서 추가해줘.</p>';
+    if(state.edit&&names.length>1)html+='<p class="edithint"><i class="grip" aria-hidden="true"></i>잡고 끌면 순서가 바뀌어</p>';
+    var tip=!state.edit&&state.loaded&&names.length>1&&!tipSeen();
+    html+=names.length?names.map(function(n,i){return exHTML(n,byEx)+(tip&&i===0?tipHTML():'')}).join(''):'<p class="note">이 루틴에 종목이 없어. 아래 종목 편집에서 추가해줘.</p>';
     html+='<div class="tools">'+(state.edit?'<form id="addex"><input id="newex" maxlength="30" placeholder="종목 이름 (예: 케이블 크로스오버)" autocomplete="off"><button type="submit">추가</button></form>':'')+
       '<button class="ghost" id="edit-btn" data-act="edit">'+(state.edit?'편집 끝내기':'종목 편집')+'</button></div>';
     return html;
@@ -726,6 +760,7 @@ body.resting{padding-bottom:164px}
     var app=$('#app'),a=document.activeElement,fid=a&&a.id&&app.contains(a)?a.id:null,pos=null;
     if(fid&&typeof a.selectionStart==='number')pos=[a.selectionStart,a.selectionEnd];
     document.body.classList.toggle('setup',!!state.setup);
+    document.body.classList.toggle('editing',!!state.edit&&state.tab==='log'&&!state.setup);
     if(state.setup){$('#head').innerHTML='<h1 class="h1">처음 설정</h1>';$('#view').innerHTML=setupHTML()}
     else{
       $('#head').innerHTML=headHTML();
@@ -746,6 +781,7 @@ body.resting{padding-bottom:164px}
     else if(a==='rtadd')addRoutine();
     else if(a==='su-n'){state.setup=setupFor(+t.dataset.n,state.setup.fill);render()}
     else if(a==='su-go')finishSetup();
+    else if(a==='tipok')closeTip();
     else if(a==='rtdel')delRoutine();
     else if(a==='toggle'){state.open=state.open===ex?null:ex;render()}
     else if(a==='adj'){
@@ -780,6 +816,113 @@ body.resting{padding-bottom:164px}
     e.preventDefault();
     if(e.target.id==='addex'){addEx($('#newex').value)}
   });
+
+  /* ---------- 꾹 눌러서 순서 바꾸기 (종목 머리, 루틴 버튼) ---------- */
+  /* 처음 한 번 뜨는 안내 말풍선 */
+  var TIP_KEY='ppl-tip-drag';
+  function tipSeen(){try{return !!localStorage.getItem(TIP_KEY)}catch(e){return true}}
+  function tipHTML(){
+    return '<div class="tip" id="tip" role="note"><span class="tipic" aria-hidden="true"><i></i><i></i></span>'+
+      '<span class="tiptx"><b>꾹 눌러서 끌어봐</b><span>종목과 루틴 순서를 바꿀 수 있어</span></span>'+
+      '<button data-act="tipok">알겠어</button></div>';
+  }
+  function closeTip(quiet){
+    try{localStorage.setItem(TIP_KEY,'1')}catch(e){}
+    var t=$('#tip');if(!t)return;
+    if(quiet){t.remove();return}
+    t.classList.add('out');setTimeout(function(){t.remove()},220);
+  }
+
+  /* 아이폰 홈 화면 아이콘처럼: 꾹 누르면 떠오르고, 손가락을 그대로 따라오고, 나머지는 부드럽게 비켜준다 */
+  var drag=null,press=null,noClick=false,scrollRaf=0;
+  var EASE='cubic-bezier(.2,.8,.2,1)',LIFT=1.05;
+  function dragSibs(d){return Array.prototype.filter.call(d.item.parentNode.children,function(c){return c!==d.item&&(d.kind==='ex'?c.classList.contains('ex'):c.dataset.act==='routine')})}
+  function inParent(d,x,y){var op=d.item.offsetParent||document.body,r=op.getBoundingClientRect();return {x:x-r.left-op.clientLeft,y:y-r.top-op.clientTop}}
+  function follow(d){
+    var p=inParent(d,d.cx,d.cy);
+    d.item.style.transform='translate('+(p.x-d.gx-d.item.offsetLeft)+'px,'+(p.y-d.gy-d.item.offsetTop)+'px) scale('+LIFT+')';
+  }
+  function reorder(d){
+    var ex=d.kind==='ex',it=d.item,box=it.parentNode,sibs=dragSibs(d),p=inParent(d,d.cx,d.cy),ref=null;
+    // 떠 있는 카드의 가운데가 어느 칸 가운데를 넘었는지로 자리를 정한다
+    var c=ex?p.y-d.gy+it.offsetHeight/2:p.x-d.gx+it.offsetWidth/2;
+    for(var i=0;i<sibs.length;i++){var s=sibs[i];if(c<(ex?s.offsetTop+s.offsetHeight/2:s.offsetLeft+s.offsetWidth/2)){ref=s;break}}
+    var target=ref||(sibs.length?sibs[sibs.length-1].nextSibling:null);
+    if(target===it||it.nextSibling===target||(!ref&&sibs.length&&sibs[sibs.length-1].nextElementSibling===it))return;
+    var before=sibs.map(function(s){return [s.offsetLeft,s.offsetTop]});
+    box.insertBefore(it,target);
+    sibs.forEach(function(s,i){
+      var dx=before[i][0]-s.offsetLeft,dy=before[i][1]-s.offsetTop;if(!dx&&!dy)return;
+      s.style.transition='none';s.style.transform='translate('+dx+'px,'+dy+'px)';
+      s.getBoundingClientRect();
+      s.style.transition='transform .28s '+EASE;s.style.transform='';
+    });
+  }
+  function autoScroll(){
+    scrollRaf=0;if(!drag||drag.kind!=='ex')return;
+    var top=($('.top')||document.body).getBoundingClientRect().bottom,bot=window.innerHeight-70,v=0;
+    if(drag.cy<top+50)v=-Math.ceil((top+50-drag.cy)/6);else if(drag.cy>bot-50)v=Math.ceil((drag.cy-bot+50)/6);
+    if(v){window.scrollBy(0,v);follow(drag);reorder(drag);follow(drag)}
+    scrollRaf=requestAnimationFrame(autoScroll);
+  }
+  document.addEventListener('pointerdown',function(e){
+    if(e.button>0||state.setup||drag)return;
+    var h=e.target.closest('.exhead,.seg [data-act="routine"]');if(!h)return;
+    var item=h.classList.contains('exhead')?h.closest('.ex'):h;
+    if(press)clearTimeout(press.timer);
+    // 편집 모드: ≡ 손잡이는 누르는 즉시, 루틴 버튼은 움직이기 시작하면 바로 끌기. 그 밖엔 꾹 눌러야(0.4초) 끌기
+    if(e.target.closest('.grip')){startDrag(item,e.pointerId,e.clientX,e.clientY);return}
+    press={id:e.pointerId,x:e.clientX,y:e.clientY,item:item,moveStarts:state.edit&&!item.classList.contains('ex'),timer:setTimeout(function(){
+      var p=press;press=null;startDrag(p.item,p.id,p.x,p.y);
+    },400)};
+  });
+  function startDrag(item,id,x,y){
+    if(tipSeen()===false)closeTip(true);
+    var d={kind:item.classList.contains('ex')?'ex':'rt',item:item,id:id,cx:x,cy:y};
+    var p=inParent(d,x,y);d.gx=p.x-item.offsetLeft;d.gy=p.y-item.offsetTop;
+    drag=d;item.classList.add('dragging');document.body.classList.add('drag');
+    item.style.transition='transform .2s '+EASE+', box-shadow .2s';item.style.transform='scale('+LIFT+')';
+    if(d.kind==='ex')scrollRaf=requestAnimationFrame(autoScroll);
+  }
+  document.addEventListener('pointermove',function(e){
+    if(press&&e.pointerId===press.id&&Math.abs(e.clientX-press.x)+Math.abs(e.clientY-press.y)>(press.moveStarts?6:10)){
+      var p=press;clearTimeout(p.timer);press=null;
+      if(p.moveStarts)startDrag(p.item,p.id,p.x,p.y);
+    }
+    if(!drag||e.pointerId!==drag.id)return;
+    e.preventDefault();
+    drag.cx=e.clientX;drag.cy=e.clientY;
+    drag.item.style.transition='box-shadow .2s';
+    reorder(drag);follow(drag);
+  });
+  function endDrag(){
+    if(press){clearTimeout(press.timer);press=null}
+    if(!drag)return;
+    var d=drag;drag=null;cancelAnimationFrame(scrollRaf);scrollRaf=0;
+    noClick=true;setTimeout(function(){noClick=false},500);
+    // 제자리로 내려앉는 모션이 끝난 뒤에 저장(저장하면 화면을 다시 그리기 때문)
+    d.item.style.transition='transform .26s '+EASE+', box-shadow .26s';d.item.style.transform='';d.item.classList.remove('dragging');
+    setTimeout(function(){document.body.classList.remove('drag');commitOrder(d)},270);
+  }
+  function commitOrder(d){
+    dragSibs(d).concat(d.item).forEach(function(s){s.style.transition='';s.style.transform=''});
+    if(d.kind==='ex'){
+      var names=Array.prototype.map.call(document.querySelectorAll('#view .ex'),function(s){return s.dataset.name});
+      if(names.join('\n')!==listFor(state.routine).join('\n'))mutateLists(function(l){l[state.routine]=names});
+    }else{
+      var keys=Array.prototype.map.call(document.querySelectorAll('.seg [data-act="routine"]'),function(b){return b.dataset.r});
+      var cur=shownR().map(function(r){return r.k});
+      if(keys.join()!==cur.join())mutateLists(function(){
+        ROUTINES=keys.map(rk).concat(ROUTINES.filter(function(r){return r.off}));
+      });
+    }
+  }
+  document.addEventListener('pointerup',endDrag);
+  document.addEventListener('pointercancel',endDrag);
+  // 끄는 중에는 화면 스크롤·길게 누르기 메뉴를 막고, 손 뗀 직후의 탭(열기/루틴 선택)은 무시
+  document.addEventListener('touchmove',function(e){if(drag)e.preventDefault()},{passive:false});
+  document.addEventListener('contextmenu',function(e){if(drag||press)e.preventDefault()});
+  document.addEventListener('click',function(e){if(noClick){noClick=false;e.stopPropagation();e.preventDefault()}},true);
 
   /* ---------- 시작 ---------- */
   render();
