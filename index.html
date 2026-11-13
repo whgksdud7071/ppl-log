@@ -319,7 +319,8 @@ body.resting{padding-bottom:164px}
   var REST_MS=90000, timer=null, tickId=null, audioCtx=null;
   function fmtClock(ms){var s=Math.ceil(ms/1000);return Math.floor(s/60)+':'+pad(s%60)}
   function unlockAudio(){
-    try{if(window.speechSynthesis&&window.SpeechSynthesisUtterance){var u=new SpeechSynthesisUtterance('.');u.volume=0;window.speechSynthesis.speak(u)}}catch(e){}
+    // 듣던 음악을 멈추지 않고 위에 섞어서 재생 (iOS 17+). 무음 음성 예열은 음악을 멈춰서 뺐다
+    try{if(navigator.audioSession)navigator.audioSession.type='ambient'}catch(e){}
     try{var AC=window.AudioContext||window.webkitAudioContext;if(AC){if(!audioCtx)audioCtx=new AC();wakeAudio();loadSound()}}catch(e){}
   }
   /* 아이폰은 백그라운드·화면 꺼짐 뒤 오디오를 'interrupted'로 바꾼다. 'suspended'만 보면 이후 소리가 안 남 */
