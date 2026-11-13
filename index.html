@@ -19,7 +19,7 @@
 :root{
   --bg:#eceff1; --surface:#ffffff; --ink:#12171c; --muted:#5a6672; --line:#d6dbe0;
   --accent:#e4572e; --accent-ink:#ffffff;
-  --push:#3a6fd8; --pull:#14917f; --legs:#b97d12;
+  --c0:#3a6fd8; --c1:#7b9de4; --c2:#14917f; --c3:#58b3a5; --c4:#b97d12; --c5:#8a5cc7; --c6:#c94f7c; --c7:#5f7383;
   --up:#d6303a; --down:#2563d9;
   --font-body:'Noto Sans KR',system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
   --font-num:'Barlow Condensed','Arial Narrow','Roboto Condensed',system-ui,sans-serif;
@@ -28,7 +28,7 @@
   :root:not([data-theme="light"]){
     --bg:#0f1317; --surface:#192027; --ink:#e9edf0; --muted:#8e9aa6; --line:#2b353e;
     --accent:#ff7a4d; --accent-ink:#1a0c06;
-    --push:#6d9bff; --pull:#3cc7b3; --legs:#e6b04a;
+    --c0:#6d9bff; --c1:#a9c2ff; --c2:#3cc7b3; --c3:#86e0d2; --c4:#e6b04a; --c5:#b48cf0; --c6:#f07fa8; --c7:#9fb0bf;
     --up:#ff5c63; --down:#5b93ff;
     color-scheme:dark;
   }
@@ -36,7 +36,7 @@
 :root[data-theme="dark"]{
   --bg:#0f1317; --surface:#192027; --ink:#e9edf0; --muted:#8e9aa6; --line:#2b353e;
   --accent:#ff7a4d; --accent-ink:#1a0c06;
-  --push:#6d9bff; --pull:#3cc7b3; --legs:#e6b04a;
+  --c0:#6d9bff; --c1:#a9c2ff; --c2:#3cc7b3; --c3:#86e0d2; --c4:#e6b04a; --c5:#b48cf0; --c6:#f07fa8; --c7:#9fb0bf;
   --up:#ff5c63; --down:#5b93ff;
   color-scheme:dark;
 }
@@ -73,10 +73,13 @@ button:focus-visible,input:focus-visible,.datepick:focus-within{outline:2px soli
 .sum b:first-child{margin-left:0}
 .seg{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
 .seg button{background:var(--surface);border-radius:10px;min-height:48px;font-weight:700;font-size:14px;color:var(--muted);border-top:4px solid var(--line)}
-.seg button[aria-pressed="true"]{color:var(--ink);box-shadow:0 0 0 1px var(--line)}
-.seg .push[aria-pressed="true"]{border-top-color:var(--push)}
-.seg .pull[aria-pressed="true"]{border-top-color:var(--pull)}
-.seg .legs[aria-pressed="true"]{border-top-color:var(--legs)}
+.seg button[aria-pressed="true"]{color:var(--ink);box-shadow:0 0 0 1px var(--line);border-top-color:var(--rc)}
+.seg button{padding:0 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.seg .rtadd{border-top:4px solid transparent;background:transparent;box-shadow:inset 0 0 0 1.5px var(--line);font-size:22px;font-weight:500}
+.rtedit{display:grid;gap:4px;margin-top:10px}
+.rtrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.rtrow input{min-width:0;min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:0 12px;font:inherit;font-weight:700}
+.rtdel{min-height:44px;padding:0 12px;color:var(--muted);font-size:13px;text-decoration:underline}
 
 .note{color:var(--muted);margin:16px 0;text-align:center}
 .banner{margin:6px 0 0;padding:10px 12px;border-radius:10px;background:var(--surface);color:var(--muted);font-size:13px;border:1px solid var(--line)}
@@ -115,7 +118,7 @@ button:focus-visible,input:focus-visible,.datepick:focus-within{outline:2px soli
 .dayhead{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;min-height:48px;text-align:left}
 .dayd{font-weight:700}
 .pill{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:99px;border:1px solid currentColor;margin-left:8px}
-.pill.push{color:var(--push)}.pill.pull{color:var(--pull)}.pill.legs{color:var(--legs)}
+.pill{color:var(--rc)}
 .dayvol{font-family:var(--font-num);font-size:16px;color:var(--muted);white-space:nowrap}
 .daylist{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:14px}
 .daylist li{display:grid;grid-template-columns:minmax(0,9em) minmax(0,1fr) 32px;gap:8px;align-items:center}
@@ -130,10 +133,9 @@ button:focus-visible,input:focus-visible,.datepick:focus-within{outline:2px soli
 .chart{width:100%;height:auto;display:block}
 .chart text{fill:var(--muted);font-family:var(--font-num);font-size:11px}
 .chart line{stroke:var(--line);stroke-width:1}
-.c-push{fill:var(--push)}.c-pull{fill:var(--pull)}.c-legs{fill:var(--legs)}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
 .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
-.dot.push{background:var(--push)}.dot.pull{background:var(--pull)}.dot.legs{background:var(--legs)}
+.dot{background:var(--rc)}
 .pr{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"n big" "d sp";gap:2px 12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
 .pr:first-of-type{border-top:0}
 .pr .n{grid-area:n;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -187,8 +189,9 @@ body.resting{padding-bottom:164px}
 
 <script>
 (function(){
-  var ROUTINES=[{k:'pushA',label:'푸시1',g:'push'},{k:'pushB',label:'푸시2',g:'push'},{k:'pullA',label:'풀1',g:'pull'},{k:'pullB',label:'풀2',g:'pull'},{k:'legs',label:'하체',g:'legs'}];
-  var GROUPS=[{k:'push',label:'푸시'},{k:'pull',label:'풀'},{k:'legs',label:'하체'}];
+  /* 루틴: k는 기록에 저장되는 고정 키(이름 바꿔도 안 변함), c는 색 번호(--c0~7), off는 지운 루틴(기록 표시용으로 남김) */
+  var ROUTINES0=[{k:'pushA',label:'푸시1',c:0},{k:'pushB',label:'푸시2',c:1},{k:'pullA',label:'풀1',c:2},{k:'pullB',label:'풀2',c:3},{k:'legs',label:'하체',c:4}];
+  var ROUTINES=JSON.parse(JSON.stringify(ROUTINES0)), MAX_R=6, COLORS=8;
   var DEFAULTS={
     pushA:['오버헤드 바벨 프레스','인클라인 덤벨 벤치 프레스','시티드 덤벨 레터럴 레이즈','덤벨 오버헤드 숄더 프레스','트라이셉스 케이블 익스텐션','인클라인 덤벨 플라이'],
     pushB:['플랫 바벨 벤치 프레스','스탠딩 덤벨 레터럴 레이즈','덤벨 오버헤드 숄더 프레스','케이블 크로스오버','케이블 페이스 풀','딥스'],
@@ -215,13 +218,17 @@ body.resting{padding-bottom:164px}
   var num=function(v){var n=parseFloat(String(v).replace(',','.'));return isFinite(n)?n:NaN};
   var setTxt=function(s){return (s.w>0?fmtNum(s.w):'맨몸')+'×'+s.r};
   var rk=function(k){return ROUTINES.filter(function(r){return r.k===k})[0]};
+  var shownR=function(){return ROUTINES.filter(function(r){return !r.off})};
+  var rLabel=function(k){var r=rk(k);return r?r.label:'루틴'};
+  var rColor=function(k){var r=rk(k);return 'var(--c'+(r?r.c:COLORS-1)+')'};
+  function ensureRoutine(){var r=rk(state.routine);if(!r||r.off)state.routine=shownR()[0].k}
   var volOf=function(sets){return sets.reduce(function(a,s){return a+s.w*s.r},0)};
   var hash=function(s){var h=5381;for(var i=0;i<s.length;i++){h=((h<<5)+h+s.charCodeAt(i))>>>0}return h.toString(36)};
   var idFor=function(date,routine,ex){return date+'_'+routine+'_'+hash(ex)};
   var clone=function(o){return JSON.parse(JSON.stringify(o))};
 
-  var state={tab:'log',routine:'pushA',routineChosen:false,date:today(),docs:new Map(),lists:null,open:null,edit:false,rm:null,drafts:{},loaded:false,err:null};
-  try{var sr=localStorage.getItem('ppl-routine');if(sr&&rk(sr)){state.routine=sr;state.routineChosen=true}}catch(e){}
+  var state={tab:'log',routine:'pushA',routineChosen:false,date:today(),docs:new Map(),lists:null,open:null,edit:false,rm:null,rtdel:null,drafts:{},loaded:false,err:null};
+  try{var sr=localStorage.getItem('ppl-routine');if(sr){state.routine=sr;state.routineChosen=true}}catch(e){}
   var store=null, pending=new Map(), chains=new Map(), lastDel=null, toastTimer=null;
 
   /* ---------- 저장소 ---------- */
@@ -244,7 +251,7 @@ body.resting{padding-bottom:164px}
     if(!x||typeof x.date!=='string'||typeof x.exercise!=='string'||!Array.isArray(x.sets))return null;
     var sets=x.sets.filter(function(s){return s&&isFinite(s.w)&&isFinite(s.r)&&s.r>0}).map(function(s){return {w:Number(s.w),r:Number(s.r)}});
     if(!sets.length)return null;
-    return {id:id,date:x.date,routine:rk(x.routine)?x.routine:'pushA',exercise:x.exercise,sets:sets,ts:Number(x.ts)||0};
+    return {id:id,date:x.date,routine:typeof x.routine==='string'&&x.routine?x.routine:'pushA',exercise:x.exercise,sets:sets,ts:Number(x.ts)||0};
   }
   function applyLogs(list,err){
     if(err){state.err=err.code||'error';state.loaded=true;render();return}
@@ -254,15 +261,19 @@ body.resting{padding-bottom:164px}
     if(!state.loaded&&!state.routineChosen){
       var latest=null;state.docs.forEach(function(d){if(!latest||d.ts>latest.ts)latest=d});
       if(latest)state.routine=latest.routine;
+      ensureRoutine();
     }
     state.loaded=true;state.err=null;render();
   }
   function applyCfg(data){
     if(pending.get('cfg'))return;
+    var rs=data&&Array.isArray(data.routines)?data.routines.filter(function(r){return r&&typeof r.k==='string'&&r.k&&typeof r.label==='string'}).map(function(r){return {k:r.k,label:r.label,c:(Number(r.c)||0)%COLORS,off:!!r.off}}):[];
+    ROUTINES=rs.some(function(r){return !r.off})?rs:clone(ROUTINES0);
     if(data&&data.lists){
-      var l={};ROUTINES.forEach(function(r){l[r.k]=Array.isArray(data.lists[r.k])?data.lists[r.k].filter(function(s){return typeof s==='string'&&s}):DEFAULTS[r.k].slice()});
+      var l={};ROUTINES.forEach(function(r){l[r.k]=Array.isArray(data.lists[r.k])?data.lists[r.k].filter(function(s){return typeof s==='string'&&s}):(DEFAULTS[r.k]||[]).slice()});
       state.lists=l;
     }else state.lists=null;
+    ensureRoutine();
     render();
   }
 
@@ -281,7 +292,7 @@ body.resting{padding-bottom:164px}
   }
 
   /* ---------- 데이터 도우미 ---------- */
-  function listFor(r){return state.lists&&Array.isArray(state.lists[r])?state.lists[r]:DEFAULTS[r]}
+  function listFor(r){return state.lists&&Array.isArray(state.lists[r])?state.lists[r]:(DEFAULTS[r]||[])}
   function exIndex(){
     var m=new Map();
     state.docs.forEach(function(d){var a=m.get(d.exercise);if(!a){a=[];m.set(d.exercise,a)}a.push(d)});
@@ -307,11 +318,45 @@ body.resting{padding-bottom:164px}
     state.docs.forEach(function(d){if(d.date===state.date)sets+=d.sets.length});
     return {sets:sets};
   }
-  function mutateLists(fn){
+  function mutateLists(fn,noRender){
     if(!store){toast('잠깐만, 아직 준비 중이야');return}
     var base={};ROUTINES.forEach(function(r){base[r.k]=listFor(r.k).slice()});
     fn(base);state.lists=base;
-    persist('cfg',function(){return store.setCfg({lists:clone(state.lists)})});
+    persist('cfg',function(){return store.setCfg({lists:clone(state.lists),routines:clone(ROUTINES)})});
+    if(!noRender)render();
+  }
+
+  /* ---------- 루틴 편집 ---------- */
+  function addRoutine(){
+    if(shownR().length>=MAX_R){toast('루틴은 '+MAX_R+'개까지 만들 수 있어');return}
+    var used=ROUTINES.map(function(r){return r.c}),c=0;
+    while(c<COLORS&&used.indexOf(c)>=0)c++;
+    if(c>=COLORS)c=shownR().length%COLORS;
+    var k='r'+Date.now().toString(36);
+    mutateLists(function(l){ROUTINES.push({k:k,label:'새 루틴',c:c});l[k]=[]});
+    pickRoutine(k);
+    var inp=$('#rtname');if(inp){inp.focus();inp.select()}
+  }
+  function renameRoutine(v){
+    var r=rk(state.routine);v=String(v||'').trim().slice(0,6);
+    if(!r)return;
+    if(!v){var i=$('#rtname');if(i)i.value=r.label;return}
+    if(v===r.label)return;
+    // 다시 그리지 않고 저장만: 입력칸에서 다른 버튼을 누를 때 그 탭이 씹히지 않게
+    mutateLists(function(){r.label=v},true);
+    var b=document.getElementById('r-'+r.k);if(b)b.textContent=v;
+  }
+  function delRoutine(){
+    if(shownR().length<=1){toast('루틴은 하나는 남겨둬야 해');return}
+    if(state.rtdel!==state.routine){state.rtdel=state.routine;render();return}
+    var r=rk(state.routine);state.rtdel=null;
+    mutateLists(function(){r.off=true});
+    pickRoutine(shownR()[0].k);
+    toast(r.label+' 루틴을 지웠어. 기록은 지난 기록에 남아 있어.');
+  }
+  function pickRoutine(k){
+    state.routine=k;state.routineChosen=true;state.open=null;state.rm=null;state.rtdel=null;
+    try{localStorage.setItem('ppl-routine',k)}catch(x){}
     render();
   }
 
@@ -474,6 +519,7 @@ body.resting{padding-bottom:164px}
   function headHTML(){
     if(state.tab==='hist')return '<h1 class="h1">지난 기록</h1>';
     if(state.tab==='sum')return '<h1 class="h1">요약</h1>';
+    var canAdd=state.edit&&shownR().length<MAX_R;
     var ds=dayStats();
     var total=listFor(state.routine).length,rem=remainingCount();
     var stat=(total?'남은 운동 <b class="rem">'+rem+'</b> · ':'')+'<b>'+ds.sets+'</b>세트';
@@ -481,9 +527,12 @@ body.resting{padding-bottom:164px}
       '<input type="date" id="datein" value="'+state.date+'" aria-label="날짜 바꾸기"></label>'+
       '<div class="stat">'+stat+'</div></div>'+
       '<div class="el" aria-label="앱을 연 뒤 지난 시간"><small>경과</small><span class="ev" id="elapsed">'+elapsedHTML()+'</span></div></div>'+
-      '<div class="seg" role="group" aria-label="루틴">'+ROUTINES.map(function(r){
-        return '<button id="r-'+r.k+'" class="'+r.g+'" data-act="routine" data-r="'+r.k+'" aria-pressed="'+(state.routine===r.k)+'">'+r.label+'</button>';
-      }).join('')+'</div>';
+      '<div class="seg" role="group" aria-label="루틴" style="grid-template-columns:repeat('+(shownR().length+(canAdd?1:0))+',minmax(0,1fr))">'+shownR().map(function(r){
+        return '<button id="r-'+r.k+'" style="--rc:'+rColor(r.k)+'" data-act="routine" data-r="'+r.k+'" aria-pressed="'+(state.routine===r.k)+'">'+esc(r.label)+'</button>';
+      }).join('')+(canAdd?'<button class="rtadd" data-act="rtadd" aria-label="루틴 추가">+</button>':'')+'</div>'+
+      (state.edit?'<div class="rtedit"><label class="lab" for="rtname">루틴 이름 (6자까지)</label><div class="rtrow">'+
+        '<input id="rtname" maxlength="6" autocomplete="off" enterkeyhint="done" value="'+esc(rLabel(state.routine))+'">'+
+        '<button class="rtdel" data-act="rtdel">'+(state.rtdel===state.routine?'한 번 더 누르면 삭제':'이 루틴 삭제')+'</button></div></div>':'');
   }
 
   function exHTML(name,byEx){
@@ -543,24 +592,24 @@ body.resting{padding-bottom:164px}
       var ds=by.get(dt).sort(function(a,b){return a.ts-b.ts}),vol=0,rs=[];
       ds.forEach(function(d){vol+=volOf(d.sets);if(rs.indexOf(d.routine)<0)rs.push(d.routine)});
       return '<article class="day"><button class="dayhead" data-act="goto" data-date="'+dt+'" data-r="'+ds[0].routine+'"><span><span class="dayd">'+labelDate(dt)+'</span>'+
-        rs.map(function(r){return '<span class="pill '+rk(r).g+'">'+rk(r).label+'</span>'}).join('')+'</span><span class="dayvol">'+fmtVol(vol)+'kg</span></button>'+
+        rs.map(function(r){return '<span class="pill" style="--rc:'+rColor(r)+'">'+esc(rLabel(r))+'</span>'}).join('')+'</span><span class="dayvol">'+fmtVol(vol)+'kg</span></button>'+
         '<ul class="daylist">'+ds.map(function(d){return '<li><span class="n">'+esc(d.exercise)+'</span><span class="s">'+d.sets.map(setTxt).join('  ')+'</span>'+
           '<button class="x" data-act="deldoc" data-id="'+esc(d.id)+'" aria-label="'+esc(labelDate(dt)+' '+d.exercise)+' 기록 지우기">×</button></li>'}).join('')+'</ul></article>';
     }).join('');
   }
 
   function niceMax(m){if(m<=0)return 1000;var p=Math.pow(10,Math.floor(Math.log10(m))),f=m/p;return (f<=1?1:f<=2?2:f<=5?5:10)*p}
-  function weekChart(weeks){
+  function weekChart(weeks,keys){
     var W=320,x0=40,top=10,ph=100,bw=26,n=weeks.length,gap=(W-x0-4-n*bw)/(n-1);
-    var mx=niceMax(Math.max.apply(null,weeks.map(function(w){return w.push+w.pull+w.legs})));
+    var mx=niceMax(Math.max.apply(null,weeks.map(function(w){return w.total})));
     var out='<svg class="chart" viewBox="0 0 '+W+' 140" role="img" aria-label="최근 8주 주별 운동 볼륨">';
     out+='<line x1="'+x0+'" x2="'+(W-4)+'" y1="'+(top+ph)+'" y2="'+(top+ph)+'"/><line x1="'+x0+'" x2="'+(W-4)+'" y1="'+top+'" y2="'+top+'"/>';
     out+='<text x="'+(x0-6)+'" y="'+(top+ph+4)+'" text-anchor="end">0</text><text x="'+(x0-6)+'" y="'+(top+4)+'" text-anchor="end">'+fmtVol(mx)+'</text>';
     weeks.forEach(function(w,i){
       var x=x0+i*(bw+gap),y=top+ph;
-      ['push','pull','legs'].forEach(function(k){
-        var h=w[k]/mx*ph;if(h<=0)return;y-=h;
-        out+='<rect class="c-'+k+'" x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw+'" height="'+h.toFixed(1)+'" rx="2"/>';
+      keys.forEach(function(k){
+        var h=(w.v[k]||0)/mx*ph;if(h<=0)return;y-=h;
+        out+='<rect style="fill:'+rColor(k)+'" x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw+'" height="'+h.toFixed(1)+'" rx="2"/>';
       });
       out+='<text x="'+(x+bw/2).toFixed(1)+'" y="'+(top+ph+16)+'" text-anchor="middle">'+shortDate(w.start)+'</text>';
     });
@@ -577,15 +626,19 @@ body.resting{padding-bottom:164px}
     var wk=new Map();
     state.docs.forEach(function(d){
       var ws=weekStart(d.date),o=wk.get(ws);
-      if(!o){o={push:0,pull:0,legs:0,days:new Set(),sets:0};wk.set(ws,o)}
-      o[rk(d.routine).g]+=volOf(d.sets);o.days.add(d.date);o.sets+=d.sets.length;
+      if(!o){o={v:{},total:0,days:new Set(),sets:0};wk.set(ws,o)}
+      var vl=volOf(d.sets);o.v[d.routine]=(o.v[d.routine]||0)+vl;o.total+=vl;o.days.add(d.date);o.sets+=d.sets.length;
     });
+    var empty={v:{},total:0,days:new Set(),sets:0};
     var cur=weekStart(today()),weeks=[];
-    for(var i=7;i>=0;i--){var s=addDays(cur,-7*i),o=wk.get(s)||{push:0,pull:0,legs:0,days:new Set(),sets:0};weeks.push({start:s,push:o.push,pull:o.pull,legs:o.legs})}
-    var tw=wk.get(cur)||{push:0,pull:0,legs:0,days:new Set(),sets:0};
-    var any=weeks.some(function(w){return w.push+w.pull+w.legs>0});
-    var html='<section class="card"><h2>이번 주</h2><div class="week"><b>'+tw.days.size+'</b>일<b>'+tw.sets+'</b>세트<b>'+fmtVol(tw.push+tw.pull+tw.legs)+'</b>kg</div></section>';
-    html+='<section class="card"><h2>주별 볼륨 (최근 8주, kg)</h2>'+(any?weekChart(weeks)+'<div class="legend">'+GROUPS.map(function(r){return '<span><i class="dot '+r.k+'"></i>'+r.label+'</span>'}).join('')+'</div>':'<p class="note">기록이 쌓이면 주별 볼륨이 여기에 그려져.</p>')+'</section>';
+    for(var i=7;i>=0;i--){var s=addDays(cur,-7*i),o=wk.get(s)||empty;weeks.push({start:s,v:o.v,total:o.total})}
+    var tw=wk.get(cur)||empty;
+    // 그래프에 나온 루틴만, 루틴 순서대로 쌓는다
+    var keys=ROUTINES.map(function(r){return r.k});
+    weeks.forEach(function(w){Object.keys(w.v).forEach(function(k){if(keys.indexOf(k)<0)keys.push(k)})});
+    keys=keys.filter(function(k){return weeks.some(function(w){return w.v[k]>0})});
+    var html='<section class="card"><h2>이번 주</h2><div class="week"><b>'+tw.days.size+'</b>일<b>'+tw.sets+'</b>세트<b>'+fmtVol(tw.total)+'</b>kg</div></section>';
+    html+='<section class="card"><h2>주별 볼륨 (최근 8주, kg)</h2>'+(keys.length?weekChart(weeks,keys)+'<div class="legend">'+keys.map(function(k){return '<span><i class="dot" style="--rc:'+rColor(k)+'"></i>'+esc(rLabel(k))+'</span>'}).join('')+'</div>':'<p class="note">기록이 쌓이면 주별 볼륨이 여기에 그려져.</p>')+'</section>';
     var m=new Map();
     state.docs.forEach(function(d){
       var o=m.get(d.exercise);if(!o){o={name:d.exercise,routine:d.routine,pts:new Map(),top:new Map(),best:null,last:''};m.set(d.exercise,o)}
@@ -627,7 +680,9 @@ body.resting{padding-bottom:164px}
     var t=e.target.closest('[data-act]');if(!t)return;
     var a=t.dataset.act,ex=t.dataset.ex;
     if(a==='tab'){state.tab=t.dataset.t;render();window.scrollTo(0,0)}
-    else if(a==='routine'){state.routine=t.dataset.r;state.routineChosen=true;state.open=null;state.rm=null;try{localStorage.setItem('ppl-routine',state.routine)}catch(x){}render()}
+    else if(a==='routine')pickRoutine(t.dataset.r);
+    else if(a==='rtadd')addRoutine();
+    else if(a==='rtdel')delRoutine();
     else if(a==='toggle'){state.open=state.open===ex?null:ex;render()}
     else if(a==='adj'){
       var dr=state.drafts[ex];if(!dr)return;var dl=parseFloat(t.dataset.d),v=num(dr[t.dataset.f]);if(isNaN(v))v=0;
@@ -637,7 +692,7 @@ body.resting{padding-bottom:164px}
     else if(a==='add')addSet(ex);
     else if(a==='delset')delSet(ex,parseInt(t.dataset.i,10));
     else if(a==='undo')undo();
-    else if(a==='edit'){state.edit=!state.edit;state.rm=null;render()}
+    else if(a==='edit'){state.edit=!state.edit;state.rm=null;state.rtdel=null;render()}
     else if(a==='rmex'){if(state.rm===ex)rmEx(ex);else{state.rm=ex;render()}}
     else if(a==='deldoc')delDoc(t.dataset.id);
     else if(a==='reststop')stopRest();
@@ -650,9 +705,11 @@ body.resting{padding-bottom:164px}
   document.addEventListener('keydown',function(e){
     var t=e.target;
     if(e.key==='Enter'&&t.dataset&&t.dataset.f&&t.dataset.ex){e.preventDefault();addSet(t.dataset.ex)}
+    else if(e.key==='Enter'&&t.id==='rtname'){e.preventDefault();t.blur()}
   });
   document.addEventListener('change',function(e){
-    if(e.target.id==='datein'){state.date=e.target.value||today();state.open=null;render()}  });
+    if(e.target.id==='datein'){state.date=e.target.value||today();state.open=null;render()}
+    else if(e.target.id==='rtname')renameRoutine(e.target.value);  });
   document.addEventListener('submit',function(e){
     e.preventDefault();
     if(e.target.id==='addex'){addEx($('#newex').value)}
