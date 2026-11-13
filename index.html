@@ -303,9 +303,9 @@ body.resting{padding-bottom:164px}
   setInterval(updateElapsed,15000);
   document.addEventListener('visibilitychange',function(){if(!document.hidden)updateElapsed()});
   function dayStats(){
-    var sets=0,vol=0;
-    state.docs.forEach(function(d){if(d.date===state.date){sets+=d.sets.length;vol+=volOf(d.sets)}});
-    return {sets:sets,vol:vol};
+    var sets=0;
+    state.docs.forEach(function(d){if(d.date===state.date)sets+=d.sets.length});
+    return {sets:sets};
   }
   function mutateLists(fn){
     if(!store){toast('잠깐만, 아직 준비 중이야');return}
@@ -476,7 +476,7 @@ body.resting{padding-bottom:164px}
     if(state.tab==='sum')return '<h1 class="h1">요약</h1>';
     var ds=dayStats();
     var total=listFor(state.routine).length,rem=remainingCount();
-    var stat=(total?'남은 운동 <b class="rem">'+rem+'</b> · ':'')+'볼륨 <b>'+fmtVol(ds.vol)+'</b>kg';
+    var stat=(total?'남은 운동 <b class="rem">'+rem+'</b> · ':'')+'<b>'+ds.sets+'</b>세트';
     return '<div class="datebar"><div class="dl"><label class="datepick"><span>'+labelDate(state.date)+'</span>'+(state.date===today()?'<em>오늘</em>':'')+
       '<input type="date" id="datein" value="'+state.date+'" aria-label="날짜 바꾸기"></label>'+
       '<div class="stat">'+stat+'</div></div>'+
